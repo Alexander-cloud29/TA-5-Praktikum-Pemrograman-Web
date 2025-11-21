@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Unik & Beranimasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Menggunakan font monospasi agar angka sejajar */
+        #display, #history-display {
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* --- Custom CSS for Glassmorphism & Animations --- */
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.2); /* Transparansi */
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(10px); /* Efek Kaca Buram */
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transform: scale(1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Animasi Pop saat tombol ditekan (diaktifkan via JS) */
+        .btn-pop {
+            animation: pop 0.1s ease-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
+        /* Latar belakang yang lebih menarik */
+        body {
+            background: linear-gradient(135deg, #1f2937, #374151);
+        }
+
+        /* Display yang lebih menonjol */
+        #display {
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="calculator" class="glass-container p-6 w-full max-w-sm">
+
+        <div id="history-display" class="text-right text-gray-200 text-sm h-5 overflow-hidden"></div>
+
+        <div id="display" class="bg-gray-900 text-white text-4xl p-4 rounded-lg mb-4 text-right overflow-x-auto whitespace-nowrap">0</div>
+
+        <div class="flex mb-4 space-x-2">
+            <button id="show-history" class="p-2 text-sm rounded-lg glass-btn-tab bg-opacity-30 text-white hover:bg-opacity-50 flex-1 transition duration-200">History</button>
+            <button id="show-memory" class="p-2 text-sm rounded-lg glass-btn-tab bg-opacity-30 text-white hover:bg-opacity-50 flex-1 transition duration-200">Memory (0)</button>
+        </div>
+
+        <div id="advanced-panel" class="mb-4 p-3 bg-white bg-opacity-10 rounded-lg hidden max-h-40 overflow-y-auto text-gray-200">
+            </div>
+
+        <div class="grid grid-cols-4 gap-2 mb-4">
+            <button data-action="memory" data-value="M+" class="btn-memory text-white bg-gray-600 bg-opacity-50 hover:bg-opacity-70">M+</button>
+            <button data-action="memory" data-value="M-" class="btn-memory text-white bg-gray-600 bg-opacity-50 hover:bg-opacity-70">M-</button>
+            <button data-action="memory" data-value="MR" class="btn-memory text-white bg-gray-600 bg-opacity-50 hover:bg-opacity-70">MR</button>
+            <button data-action="memory" data-value="MC" class="btn-memory text-red-400 bg-gray-600 bg-opacity-50 hover:bg-opacity-70">MC</button>
+        </div>
+
+        <div id="buttons-grid" class="grid grid-cols-4 gap-3">
+            <button data-action="clear" data-value="C" class="btn-control col-span-2 text-white bg-red-600 hover:bg-red-700">C</button>
+            <button data-action="clear" data-value="CE" class="btn-control text-white bg-yellow-600 hover:bg-yellow-700">CE</button>
+            <button data-action="operator" data-value="÷" class="btn-op text-white bg-indigo-600 hover:bg-indigo-700">÷</button>
+
+            <button data-action="number" data-value="7" class="btn-num">7</button>
+            <button data-action="number" data-value="8" class="btn-num">8</button>
+            <button data-action="number" data-value="9" class="btn-num">9</button>
+            <button data-action="operator" data-value="×" class="btn-op text-white bg-indigo-600 hover:bg-indigo-700">×</button>
+
+            <button data-action="number" data-value="4" class="btn-num">4</button>
+            <button data-action="number" data-value="5" class="btn-num">5</button>
+            <button data-action="number" data-value="6" class="btn-num">6</button>
+            <button data-action="operator" data-value="-" class="btn-op text-white bg-indigo-600 hover:bg-indigo-700">-</button>
+
+            <button data-action="number" data-value="1" class="btn-num">1</button>
+            <button data-action="number" data-value="2" class="btn-num">2</button>
+            <button data-action="number" data-value="3" class="btn-num">3</button>
+            <button data-action="operator" data-value="+" class="btn-op text-white bg-indigo-600 hover:bg-indigo-700">+</button>
+
+            <button data-action="number" data-value="0" class="btn-num col-span-2">0</button>
+            <button data-action="decimal" data-value="." class="btn-num">.</button>
+            <button data-action="equals" data-value="=" class="btn-equals text-white bg-green-600 hover:bg-green-700"> = </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Styling Buttons dengan efek Glassmorphism dan Animasi
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultStyle = "p-4 rounded-full text-xl font-bold transition duration-200 ease-in-out shadow-lg focus:outline-none";
+
+            // Tombol Angka (Glassmorphism)
+            document.querySelectorAll('.btn-num, .btn-decimal').forEach(btn => {
+                btn.className = `${defaultStyle} bg-white bg-opacity-20 text-white hover:bg-opacity-40 active:shadow-inner`;
+            });
+
+            // Tombol Operator dan Kontrol
+            document.querySelectorAll('.btn-op, .btn-control, .btn-equals').forEach(btn => {
+                btn.className = `${defaultStyle} ${btn.className} active:shadow-inner`;
+            });
+            
+            // Tombol Memori (Glassmorphism lebih redup)
+            document.querySelectorAll('.btn-memory').forEach(btn => {
+                btn.className = `${defaultStyle} p-2 text-sm shadow-none rounded-lg ${btn.className} active:shadow-inner`;
+            });
+
+            // Adjust 0 button style
+            document.querySelector('[data-value="0"]').classList.remove('rounded-full');
+            document.querySelector('[data-value="0"]').classList.add('rounded-xl');
+            
+            // Adjust equals button style
+            document.querySelector('[data-action="equals"]').classList.add('col-span-1');
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
