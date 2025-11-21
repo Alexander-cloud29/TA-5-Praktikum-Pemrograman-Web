@@ -31,3 +31,9 @@ Proyek ini merupakan implementasi dari **Kalkulator Interaktif** menggunakan **H
 - HTML5
 - CSS 3 + TailwindCSS
 - JavaScript
+
+---
+
+## Dokumentasi
+
+<img width="1919" height="868" alt="image" src="https://github.com/user-attachments/assets/badf3536-1f88-4d3f-9b1c-85bec8973d1c" />
